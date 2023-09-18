@@ -132,11 +132,11 @@ class Process():
 
 	def test(self):
 		l.info("Rendering Test Image")
-		self.debug("sample_images/Reflective-color-chart-reference.png")
+		self("sample_images/Reflective-color-chart-reference.png")
 		l.info("Rendering Test Image 2")
-		self.debug("sample_images/gamutvision_equations_HSL_Smax_LBL.png")
+		self("sample_images/gamutvision_equations_HSL_Smax_LBL.png")
 		l.info("Rendering Test Image 3")
-		self.debug("sample_images/gamutvision_equations_HSV_Smax_LBL.png")
+		self("sample_images/gamutvision_equations_HSV_Smax_LBL.png")
 
 	# def save(self, *args):
 	# 	outpath = f"output_images/{self.name}/"
