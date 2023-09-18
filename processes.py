@@ -1,4 +1,5 @@
 from math import atan
+from operator import inv
 from PIL import Image
 import sys
 import numpy as np
@@ -140,10 +141,102 @@ def pabg(obj: Process) -> None:
 	pass
 process_avg_blue_green.prerender = pabg
 
+process_avg_red_green = Process("avg_rg")
+process_avg_red_green.scale_blue = lambda i: 1 * i
+process_avg_red_green.scale_green = lambda i: 1 * i
+def parg(obj: Process) -> None:
+	# print("oy")
+	# y = pop_var(obj.red_band, obj.blue_band, True)
+	bd1 = np.array(obj.red_band)
+	bd2 = np.array(obj.blue_band)
+	a = np.average(avg(bd1, bd2))
+	y = ((bd2-a)**2)/2
+	# print(y)
+	# obj.source[R].paste(y)
+	# obj.source[B].paste(y)
+	# obj.source[G].paste(y)
+	obj.source[B].paste(obj.green_band)
+	obj.source[G].paste(obj.blue_band)
+	pass
+process_avg_red_green.prerender = parg
+
+process7 = Process("process7")
+process7.scale_green = lambda i: 255*.2
+process7.scale_blue = lambda i: 1.2*i
+
+def p7(obj: Process) -> None:
+	b2 = np.asarray(obj.source[B])
+	band = 4*255*.6-b2
+	blueband = Image.fromarray(band)
+	obj.source[B].paste(blueband)
+	obj.source[R].paste(obj.blue_band)
+	m = obj.source[B].point(lambda i: i*1.25)
+	obj.source[B].paste(m, None, None)
+	pass
+
+process7.prerender = p7
+
+process7.test()
+
+process8 = Process("process8")
+f= lambda i: i +50
+process8.scale_blue = f
+process8.scale_red = f
+process8.scale_green = f
+
+def p8(obj: Process):
+	red_band = obj.source[R]
+	green_band = obj.source[G]
+	blue_band = obj.source[B]
+	b1 = np.array(red_band)
+	b2 = np.array(green_band)
+	b3 = np.array(blue_band)
+	red_bias = 1
+	blue_bias = 1
+	green_bias = 1
+	total_bias = red_bias+blue_bias+green_bias
+	# average = (
+	# 	b1*(red_bias/total_bias) +
+	# 	b2*(green_bias/total_bias) +
+	# 	b3*(blue_bias/total_bias)
+	# )/3
+	average = (b1 + b2 + b3)/3
+	print(average)
+	average_image = Image.fromarray(average)
+	red_bias *=1.5
+	biased_average = (
+		b1*red_bias/total_bias +
+		b2*green_bias/total_bias +
+		b3*blue_bias/total_bias)/3
+	biased_image = Image.fromarray(biased_average)
+
+	intermediate = Image.merge(mode=obj.image.mode, bands=obj.source)
+	# print(average)
+	vfunc = np.vectorize(lambda i: i <= 80 or 255)
+	vfunc = np.vectorize(lambda i: 255 if i <= 180 else 0)
+	r = vfunc(average)
+	# print(r)
+	average_image = Image.fromarray(r.astype(np.uint8))
+	mask = average_image.point(lambda i: i <= 180 or 255)
+	inv_mask = intermediate.point(lambda i: i >= 180 or 0)
+	obj.__for_debug__ = [intermediate, mask, inv_mask, average_image, biased_image]
+	# obj.source[R].paste(average_image, None, inv_mask)
+	# obj.source[G].paste(average_image, None, inv_mask)
+	# obj.source[B].paste(average_image, None, inv_mask)
+	# obj.source[R].paste(biased_image, None, inv_mask)
+	# obj.source[G].paste(biased_image, None, inv_mask)
+	# obj.source[B].paste(biased_image, None, inv_mask)
+	pass
+
+process8.prerender = p8
+
 processes: dict[str, Process] = {
 	"process2_2": process2_2,
 	"process5": process5,
 	"process3": process3,
 	"process6": process6,
-	"avg_bg": process_avg_blue_green
+	"avg_bg": process_avg_blue_green,
+	"avg_rg": process_avg_red_green,
+	"process7": process7,
+	"process8": process8,
 }

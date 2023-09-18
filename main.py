@@ -51,20 +51,13 @@ process.scale_blue = lambda i: 1.2*i
 
 
 def t(obj: Process) -> None:
-	# obj.source[B].paste(obj.green_band)
-	# obj.source[B].paste(obj.source[G].point(lambda i: (255*.6-i)/2 + i), None, obj.source[G].point(lambda i: i < 100 or 255))
-	
-	# b1 = np.asarray()
 	b2 = np.asarray(obj.source[B])
-
 	band = 4*255*.6-b2
 	blueband = Image.fromarray(band)
 	obj.source[B].paste(blueband)
 	obj.source[R].paste(obj.blue_band)
 	m = obj.source[B].point(lambda i: i*1.25)
-	# n = obj.source[G].point(lambda i: i*1.25)
 	obj.source[B].paste(m, None, None)
-	# obj.source[G].paste(n, None, None)
 	pass
 
 process.prerender = t

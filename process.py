@@ -25,6 +25,7 @@ class Process():
 	prerender: [Callable, None]
 	image: [Image.Image, None]
 	source: [Image.Image, None]
+	__for_debug__: [Image.Image]
 	def __init__(self, name):
 		self.name = name
 		self.mask_red: [Mask, None] = None
@@ -37,9 +38,11 @@ class Process():
 		self.image: [Image.Image, None] = None
 		self.source: [Image.Image, None] = None
 		
-	def debug(self):
-		print(self.scale_blue)
-	def __call__(self, fp: str):
+		self.__for_debug__: [Image.Image] = []
+
+	def debug(self, fp):
+		self(fp, debug=True)
+	def __call__(self, fp: str, debug = False):
 		self.image = Image.open(fp)
 		self.source = self.image.split()
 
@@ -90,18 +93,56 @@ class Process():
 		
 		output = Image.merge(self.image.mode, self.source)
 		outpath = f"output_images/{self.name}/"
-
+		
 		os.makedirs(os.path.join(outpath, 'sample_images'),exist_ok=True)
 		output.save(os.path.join(outpath, fp))
+		if debug:
+			try:
+				self.source[R].save(os.path.join(outpath, fp.split('/')[0],f"red_band_{fp.split('/')[1]}"))
+			except:
+				pass
+			try:
+				self.source[G].save(os.path.join(outpath,fp.split('/')[0], f"green_band_{fp.split('/')[1]}"))
+			except:
+				pass
+			try:
+				self.source[B].save(os.path.join(outpath,fp.split('/')[0], f"blue_band_{fp.split('/')[1]}"))
+			except:
+				pass
+			
+			try:
+				self.red_band_mask.save(os.path.join(outpath,fp.split('/')[0], f"red_band_{fp.split('/')[1]}"))
+			except:
+				pass
+			
+			try:
+				self.green_band_mask.save(os.path.join(outpath,fp.split('/')[0], f"green_band_{fp.split('/')[1]}"))
+			except:
+				pass
+			
+			try:
+				self.blue_band_mask.save(os.path.join(outpath, fp.split('/')[0],f"blue_band_{fp.split('/')[1]}"))
+			except:
+				pass
+			for idx, i in enumerate(self.__for_debug__):
+				try:
+					i.save(os.path.join(outpath, f"{fp}_test{idx}.tiff"))
+				except:
+					pass
 
 	def test(self):
 		l.info("Rendering Test Image")
-		self("sample_images/Reflective-color-chart-reference.png")
+		self.debug("sample_images/Reflective-color-chart-reference.png")
 		l.info("Rendering Test Image 2")
-		self("sample_images/gamutvision_equations_HSL_Smax_LBL.png")
+		self.debug("sample_images/gamutvision_equations_HSL_Smax_LBL.png")
 		l.info("Rendering Test Image 3")
-		self("sample_images/gamutvision_equations_HSV_Smax_LBL.png")
+		self.debug("sample_images/gamutvision_equations_HSV_Smax_LBL.png")
 
+	# def save(self, *args):
+	# 	outpath = f"output_images/{self.name}/"
+	# 	os.makedirs(os.path.join(outpath, 'sample_images'),exist_ok=True)
+	# 	for idx, i in enumerate(args):
+	# 		i.save(os.path.join(outpath, f"test{idx}.tiff"))
 	def full_test(self):
 		self.test()
 		files = glob("sample_images/*.jpg")
