@@ -1,3 +1,5 @@
 sample_images/*.jpg
-output_images/
-output_images*/
+*.jpg
+output_images_init*
+__pycache__
+*.tiff
